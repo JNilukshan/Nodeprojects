@@ -3,7 +3,8 @@ const Task = require('../models/taskmodel');
 
 const getAlltasks = async (req, res)=>{
     try {
-        res.status(201).json('All tasks');
+        const tasks = await Task.find({});
+        res.status(200).json({tasks});
     } catch (error) {
         res.status(500).json({msg:error});
     }
@@ -12,10 +13,7 @@ const getAlltasks = async (req, res)=>{
 const createTask = async (req, res)=> {
     try {
         const task = await Task.create(req.body)
-        if(!task){
-            return res.status(404).json({error:'task not found'});
-        }
-        res.status(201).json({task});
+        res.status(200).json({task});
     } catch (error) {
         res.status(500).json({msg:error});
     }
@@ -23,7 +21,12 @@ const createTask = async (req, res)=> {
 
 const getTask = async (req, res)=> {
     try {
-        res.status(201).json({id:req.params.id});
+        const {id:taskID}=req.params;
+        const task = await Task.findById({_id:taskID});
+        if (!task){
+            return res.status(404).json({msg:`no task with id ${taskID}`});
+        }
+        res.status(200).json({task});
     } catch (error) {
         res.status(500).json({msg:error});
     }
@@ -31,8 +34,12 @@ const getTask = async (req, res)=> {
 
 const updateTask = async (req, res)=> {
     try {
-        const {id}= req.params;
-        const task = await Task.findByIdAndUpdate(id, req.body, {new:true, runValidator:true});
+        const {id:taskID}= req.params;
+        const task = await Task.findByIdAndUpdate({_id:taskID}, req.body, {new:true, runValidator:true});
+        if (!task){
+            return res.status(404).json({msg:`no task with id ${taskID}`});
+        }
+        res.status(200).json({task});
     } catch (error) {
         res.status(500).json({msg:errror});
     }
@@ -40,8 +47,12 @@ const updateTask = async (req, res)=> {
 
 const deleteTask = async (req, res)=> {
     try {
-        const {id}= req.params;
-        const task = await Task.findByIdAndDelete(id);
+        const {id:taskID}= req.params;
+        const task = await Task.findByIdAndDelete({_id:taskID});
+        if (!task){
+            return res.status(404).json({msg:`no task with id ${taskID}`});
+        }
+        res.status(200).json({task:null, status: 'success'});
     } catch (error) {
         res.status(500).json({msg:error});
     }
